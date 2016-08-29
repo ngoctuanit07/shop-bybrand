@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout version="0.1.0">
+    <awshopbybrand_admin_adminhtml_brand_index>
+        <reference name="content">
+            <block type="awshopbybrand/adminhtml_brand" name="awshopbybrand"/>
+        </reference>
+    </awshopbybrand_admin_adminhtml_brand_index>
+    <awshopbybrand_admin_adminhtml_brand_edit>
+        <update handle='editor'/>
+        <reference name="content">
+            <block type="awshopbybrand/adminhtml_brand_edit" name="awshopbybrand_edit" />
+        </reference>
+        <reference name="left">
+            <block type="awshopbybrand/adminhtml_brand_edit_tabs" name="awshopbybrand_tabs">
+                <block type="awshopbybrand/adminhtml_brand_edit_tab_general" name="general"/>
+                <block type="awshopbybrand/adminhtml_brand_edit_tab_images" name="images"/>
+                <block type="awshopbybrand/adminhtml_brand_edit_tab_categoryimages" name="categoryimages"/>
+                <block type="awshopbybrand/adminhtml_brand_edit_tab_products" name="products">
+                    <action method="setClass"><class>ajax</class></action>
+                </block>
+                <block type="awshopbybrand/adminhtml_brand_edit_tab_brandpage" name="brandpage"/>
+                <action method="addTab"><name>brand_info_tabs_general</name><block>general</block></action>
+                <action method="addTab"><name>brand_info_tabs_images</name><block>images</block></action>
+                <action method="addTab"><name>brand_info_tabs_products</name><block>products</block></action>
+                <action method="addTab"><name>brand_info_tabs_brandpage</name><block>brandpage</block></action>
+                <action method="addTab"><name>brand_info_tabs_categoryimages</name><block>categoryimages</block></action>
+            </block>
+        </reference>
+    </awshopbybrand_admin_adminhtml_brand_edit>
+    <awshopbybrand_admin_adminhtml_brand_products>
+        <block type="core/text_list" name="root">
+            <block type="awshopbybrand/adminhtml_brand_edit_tab_products_grid" name="brand_products"/>
+            <block type="adminhtml/widget_grid_serializer" name="brand_products_serializer">
+                <reference name="brand_products_serializer">
+                    <action method="initSerializerBlock">
+                        <grid_block_name>brand_products</grid_block_name>
+                        <data_callback>getSelectedProducts</data_callback>
+                        <hidden_input_name>links[products]</hidden_input_name>
+                        <reload_param_name>brand_products</reload_param_name>
+                    </action>
+                    <action method="addColumnInputName">
+                        <input_name>position</input_name>
+                    </action>
+                </reference>
+            </block>
+        </block>
+    </awshopbybrand_admin_adminhtml_brand_products>
+    <awshopbybrand_admin_adminhtml_brand_productsgrid>
+        <block type="core/text_list" name="root">
+            <block type="awshopbybrand/adminhtml_brand_edit_tab_products_grid" name="brand_products"/>
+        </block>
+    </awshopbybrand_admin_adminhtml_brand_productsgrid>
+    <adminhtml_system_config_edit>
+        <update handle='editor'/>
+    </adminhtml_system_config_edit>
+</layout>

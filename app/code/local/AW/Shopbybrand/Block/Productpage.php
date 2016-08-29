@@ -1,0 +1,100 @@
+<?php
+/**
+ * aheadWorks Co.
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://ecommerce.aheadworks.com/AW-LICENSE.txt
+ *
+ * =================================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * =================================================================
+ * This software is designed to work with Magento community edition and
+ * its use on an edition other than specified is prohibited. aheadWorks does not
+ * provide extension support in case of incorrect edition use.
+ * =================================================================
+ *
+ * @category   AW
+ * @package    AW_Shopbybrand
+ * @version    1.3.2
+ * @copyright  Copyright (c) 2010-2012 aheadWorks Co. (http://www.aheadworks.com)
+ * @license    http://ecommerce.aheadworks.com/AW-LICENSE.txt
+ */
+
+
+class AW_Shopbybrand_Block_Productpage extends Mage_Core_Block_Template
+{
+    protected $_brandModel = null;
+
+    /**
+     * @return AW_Shopbybrand_Model_Brand|null
+     */
+    public function getBrand()
+    {
+        if (null !== $this->_brandModel) {
+            return $this->_brandModel;
+        }
+        $brandId = Mage::registry('current_product')->getData('aw_shopbybrand_brand');
+        if (null === $brandId) {
+            return null;
+        }
+        $brandModel = Mage::getModel('awshopbybrand/brand')->load($brandId);
+        if (null === $brandModel->getId()) {
+            return null;
+        }
+        $this->_brandModel = $brandModel;
+        return $this->_brandModel;
+    }
+
+    public function getImageUrl($width = null, $height = null)
+    {
+        $imageUrl = Mage::getDesign()->getSkinBaseUrl() . AW_Shopbybrand_Model_Brand::DEFAULT_IMAGE_PATH;
+        if ($this->getBrand()->getIcon()) {
+            $imageUrl = $this->helper('awshopbybrand')->resizeImg($this->getBrand()->getIcon(), $width, $height);
+        }
+        return $imageUrl;
+    }
+
+    public function getProductpageConfig()
+    {
+        return $this->helper('awshopbybrand/config')->getProductPageDisplayMode();
+    }
+    
+    public function getShippingTime()
+    {
+    	$brandcollection = Mage::getModel('awshopbybrand/brand')->getCollection();
+    	$brandcollection->addFieldToFilter('page_title', array('like' => Mage::registry('current_product')->getAttributeText('manufacturer')));
+    	foreach($brandcollection as $brandcollection1){
+    		$brandid = $brandcollection1['id'];
+    		$shippingtime = $brandcollection1['shipping_time'];
+    	}
+    	$brandstorecollection = Mage::getModel('awshopbybrand/brandstore')->getCollection();
+    	$brandstorecollection->addFieldToFilter('brand_id', array('eq' => $brandid));
+    	$brandstorecollection->addFieldToFilter('store_id', array('eq' => Mage::app()->getStore()->getStoreId()));
+    	foreach($brandstorecollection as $brandstorecollection1){
+    		//$brandid = $brandcollection1['id'];
+    		$shippingstoretime = $brandstorecollection1['shipping_time'];
+    	}
+    	return ($shippingstoretime) ? $shippingstoretime : $shippingtime;
+    }
+
+    public function getAllBrandsUrlKey()
+    {
+        return Mage::getBaseUrl() . Mage::helper('awshopbybrand/config')->getAllBrandsUrlKey();
+    }
+
+    public function getBrandUrl()
+    {
+        return $this->getAllBrandsUrlKey() . DS . $this->getBrand()->getUrlKey();
+    }
+
+    public function isCanShow()
+    {
+        return ($this->getProductpageConfig()
+            && $this->getBrand()
+            && $this->getBrand()->getBrandStatus()== AW_Shopbybrand_Model_Source_Status::STATUS_ACTIVE);
+    }
+}

@@ -1,0 +1,280 @@
+<?php
+/**
+ * aheadWorks Co.
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the EULA
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://ecommerce.aheadworks.com/AW-LICENSE.txt
+ *
+ * =================================================================
+ *                 MAGENTO EDITION USAGE NOTICE
+ * =================================================================
+ * This software is designed to work with Magento community edition and
+ * its use on an edition other than specified is prohibited. aheadWorks does not
+ * provide extension support in case of incorrect edition use.
+ * =================================================================
+ *
+ * @category   AW
+ * @package    AW_Shopbybrand
+ * @version    1.3.2
+ * @copyright  Copyright (c) 2010-2012 aheadWorks Co. (http://www.aheadworks.com)
+ * @license    http://ecommerce.aheadworks.com/AW-LICENSE.txt
+ */
+
+
+class AW_Shopbybrand_Adminhtml_BrandController extends Mage_Adminhtml_Controller_Action
+{
+    protected function _initAction($actionName)
+    {
+        $this->loadLayout()
+            ->_setActiveMenu('catalog/awshopbybrand')
+            ->_addBreadcrumb($actionName, $this->__('Manage Brands'))
+            ->_title($this->__('Shop By Brand'))
+            ->_title($actionName)
+        ;
+        return $this;
+    }
+
+    /**
+     * @return AW_Shopbybrand_Model_Brand|null
+     */
+    protected function _initBrand()
+    {
+        $brandModel = Mage::getModel('awshopbybrand/brand');
+        $brandId = (int)$this->getRequest()->getParam('id', 0);
+        if ($brandId) {
+            try {
+                $brandModel->load($brandId);
+                if (!$brandModel->getId()) {
+                    throw new Exception($this->__('This brand no longer exists'));
+                }
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                return null;
+            }
+        }
+
+        if (null !== Mage::getSingleton('adminhtml/session')->getBrandData()) {
+            $brandModel->addData(Mage::getSingleton('adminhtml/session')->getBrandData());
+            Mage::getSingleton('adminhtml/session')->setBrandData(null);
+        }
+
+        Mage::register('current_brand', $brandModel);
+        return $brandModel;
+    }
+
+    public function indexAction()
+    {
+        $this
+            ->_initAction($this->__('Manage Brands'))
+            ->renderLayout()
+        ;
+    }
+
+    /**
+     * Export customer grid to CSV format
+     */
+    public function exportCsvAction()
+    {
+        $fileName = 'brands.csv';
+        $content = $this->getLayout()
+            ->createBlock('awshopbybrand/adminhtml_brand_grid')
+            ->getCsvFile()
+        ;
+        $this->_prepareDownloadResponse($fileName, $content);
+    }
+
+    /**
+     * Export customer grid to XML format
+     */
+    public function exportXmlAction()
+    {
+        $fileName = 'brands.xml';
+        $content = $this->getLayout()
+            ->createBlock('awshopbybrand/adminhtml_brand_grid')
+            ->getExcelFile()
+        ;
+        $this->_prepareDownloadResponse($fileName, $content);
+    }
+
+    public function editAction()
+    {
+        $brandModel = $this->_initBrand();
+        if (null === $brandModel) {
+            return $this->_redirect('*/*/');
+        }
+        $isNewBrandPage = !!$this->getRequest()->getParam('id', false);
+        $this
+            ->_initAction($this->__($isNewBrandPage ? 'Edit Brand' : 'New Brand'))
+            ->renderLayout()
+        ;
+        return $this;
+    }
+
+    public function newAction()
+    {
+        $this->_forward('edit');
+    }
+
+    public function massDeleteAction()
+    {
+        $brandIdList = $this->getRequest()->getParam('id');
+        if (!is_array($brandIdList)) {
+            Mage::getSingleton('adminhtml/session')->addError($this->__('Please select item(s)'));
+            return $this->_redirect('*/*/');
+        }
+        try {
+            foreach ($brandIdList as $brandId) {
+                Mage::getModel('awshopbybrand/brand')->setId($brandId)->delete();
+            }
+            Mage::getSingleton('adminhtml/session')->addSuccess(
+                $this->__('Total of %d record(s) were successfully deleted', count($brandIdList))
+            );
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        }
+        $this->_redirect('*/*/');
+        return $this;
+    }
+
+    public function massStatusAction()
+    {
+        $brandIdList = $this->getRequest()->getParam('id');
+        if (!is_array($brandIdList)) {
+            Mage::getSingleton('adminhtml/session')->addError($this->__('Please select item(s)'));
+            return $this->_redirect('*/*/');
+        }
+        try {
+            foreach ($brandIdList as $brandId) {
+                $model = Mage::getModel('awshopbybrand/brand')->load($brandId);
+                $model->setData('brand_status', $this->getRequest()->getParam('brand_status'));
+                $model->save();
+            }
+            Mage::getSingleton('adminhtml/session')->addSuccess(
+                $this->__('Total of %d record(s) were successfully updated', count($brandIdList))
+            );
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        }
+        $this->_redirect('*/*/');
+        return $this;
+    }
+
+    public function deleteAction()
+    {
+        $brandModel = $this->_initBrand();
+        if (null === $brandModel) {
+            return $this->_redirect('*/*/');
+        }
+        try {
+            $brandModel->delete();
+            Mage::getSingleton('adminhtml/session')->addSuccess($this->__('Brand was successfully deleted'));
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+        }
+        return $this->_redirect('*/*/');
+    }
+
+    public function saveAction()
+    {
+        if (!$data = $this->getRequest()->getPost()) {
+            $this->_redirect('*/*/');
+        }
+
+        $links = $this->getRequest()->getPost('links', array());
+
+        if (array_key_exists('products', $links)) {
+            $selectedProducts = Mage::helper('adminhtml/js')->decodeGridSerializedInput($links['products']);
+            $data['products'] = implode(',', array_keys($selectedProducts));
+        }
+
+        $brandModel = $this->_initBrand();
+        if (null === $brandModel) {
+            return $this->_redirect('*/*/');
+        }
+
+        if (isset($data['image']['delete'])) {
+            $brandModel->removeImage($data['image']['value']);
+            $brandModel->setImage('');
+        }
+
+        if (isset($data['icon']['delete'])) {
+            $brandModel->removeImage($data['icon']['value']);
+            $brandModel->setIcon('');
+        }
+
+        try {
+            if ($_FILES['image']['tmp_name']) {
+                $imageFileName = $brandModel->uploadImage('image');
+                $data['image'] = 'aw_shopbybrand' . DS . 'image' . DS . $imageFileName;
+            } else {
+                unset($data['image']);
+            }
+
+            if ($_FILES['icon']['tmp_name']) {
+                $iconFileName = $brandModel->uploadImage('icon');
+                $data['icon'] = 'aw_shopbybrand' . DS . 'icon' . DS . $iconFileName;
+            } else {
+                unset($data['icon']);
+            }
+
+            $brandModel
+                ->addData($data)
+                ->save()
+            ;
+
+            if (isset($selectedProducts)) {
+                $brandModel->updateProductPositions($selectedProducts);
+            }
+
+            Mage::getSingleton('adminhtml/session')->addSuccess($this->__('Brand was successfully saved'));
+
+            Mage::getSingleton('adminhtml/session')->setBrandData(null);
+            if ($this->getRequest()->getParam('back')) {
+                return $this->_redirect(
+                    '*/*/edit',
+                    array(
+                        'id'         => $brandModel->getId(),
+                        'active_tab' => Mage::app()->getRequest()->getParam('tab'),
+                    )
+                );
+            }
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            Mage::getSingleton('adminhtml/session')->setBrandData($data);
+            return $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+        }
+
+        return $this->_redirect('*/*/');
+    }
+
+    /**
+     * Get related products grid
+     */
+    public function productsgridAction()
+    {
+        if (null === $this->_initBrand()) {
+            return $this->_redirect('*/*/');
+        }
+        $this
+            ->loadLayout()
+            ->renderLayout()
+        ;
+        return $this;
+    }
+
+    public function productsAction()
+    {
+        if (null === $this->_initBrand()) {
+            return $this->_redirect('*/*/');
+        }
+        $this
+            ->loadLayout()
+            ->renderLayout()
+        ;
+        return $this;
+    }
+}

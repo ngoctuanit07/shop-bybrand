@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout version="0.1.0">
+    <default>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>aw_shopbybrand/css/aw_brands.css</stylesheet>
+            </action>
+        </reference>
+        <reference name="left">
+            <block type="awshopbybrand/brandsbar" name="brandsbar" before="-"
+                   template="aw_shopbybrand/brandsbar.phtml"
+                   ifconfig='awshopbybrand/brands_list_setup/brands_list_display_mode'/>
+        </reference>
+        <reference name="top.menu">
+            <!--Note: use custom block file for menu drawing and default template file-->
+            <block type="awshopbybrand/navigation" name="newmenu.topnav" template="aw_shopbybrand/navigation.phtml">
+            </block>
+        </reference>
+    </default> 
+    <catalog_product_view>
+        <!--Render brand on product page in product.info.extrahint position -->
+        <reference name="product.info.extrahint">
+            <block type="awshopbybrand/productpage" name="product.info.addtocart.brands"
+                   template="aw_shopbybrand/productpage.phtml"
+                   ifconfig='awshopbybrand/product_page_setup/product_page_display_mode'/>
+            <block type="awshopbybrand/productpage" name="product.info.addtocart.brands.shippingtime"
+                   template="aw_shopbybrand/shipping_time.phtml"/>
+        </reference>
+<!--         <reference name="product.info.addtocart">
+            <block type="awshopbybrand/productpage" name="product.info.addtocart.brands.shippingtime" before="-" template="aw_shopbybrand/shipping_time.phtml" />
+        </reference> -->
+    </catalog_product_view>
+    <awshopbybrand_index_allbrandsview translate="label" module="awshopbybrand">
+        <label>All Brands Page</label>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>aw_shopbybrand/css/aw_brands.css</stylesheet>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-left.phtml</template>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="awshopbybrand/allbrands" name="allbrands" template="aw_shopbybrand/allbrands.phtml"/>
+        </reference>
+    </awshopbybrand_index_allbrandsview>
+    <awshopbybrand_brand_index>
+        <reference name="content">
+            <block type="awshopbybrand/brand" name="brand" template="aw_shopbybrand/brand.phtml">
+                <block type="catalog/product_list" name="productlist" as="productlist"
+                       template="catalog/product/list.phtml">
+                    <block type="core/text_list" name="product_list.name.after" as="name.after" />
+                    <block type="core/text_list" name="product_list.after" as="after" />
+                </block>
+            </block>
+        </reference>
+    </awshopbybrand_brand_index>
+    <awshopbybrand_index_brandpageview>
+        <label>Brand Page</label>
+        <update handle="MAP_popup"/>
+        <update handle="MAP_price_msrp_item"/>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>
+        <reference name="left">
+            <block type="awshopbybrand/layer_view" name="catalog.leftnav" after="brandsbar" template="catalog/layer/view.phtml">
+                <block type="core/text_list" name="catalog.leftnav.state.renderers" as="state_renderers" />
+            </block>
+        </reference>
+        <reference name="content">
+            <block type="awshopbybrand/brand" name="brand" template="aw_shopbybrand/brand.phtml">
+                <block type="catalog/product_list" name="productlist" as="productlist"
+                       template="catalog/product/brandlist.phtml">
+                    <block type="core/text_list" name="product_list.name.after" as="name.after" />
+                    <block type="core/text_list" name="product_list.after" as="after" />
+                    <block type="catalog/product_list_toolbar" name="product_list_toolbar"
+                           template="catalog/product/list/toolbar.phtml">
+                        <block type="page/html_pager" name="product_list_toolbar_pager"/>
+                    </block>
+                    <action method="setColumnCount">
+                        <columns>4</columns>
+                    </action>
+                    <action method="setToolbarBlockName">
+                        <name>product_list_toolbar</name>
+                    </action>
+                </block>
+            </block>
+        </reference>
+    </awshopbybrand_index_brandpageview>
+</layout>

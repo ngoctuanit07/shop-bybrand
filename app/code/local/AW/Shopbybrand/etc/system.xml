@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <awshopbybrand module="awshopbybrand" translate="label">
+            <label>Shop By Brand</label>
+            <tab>awall</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>1500</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label">
+                    <label>General</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <addtomenu translate="label">
+                            <label>Add to the menu</label>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                        </addtomenu>
+                    </fields>
+                </general>
+                <brands_list_setup translate="label">
+                    <label>Brands List Setup</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <brands_list_display_mode translate="label">
+                            <label>Display mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>awshopbybrand/source_displaymode_brandslist</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </brands_list_display_mode>
+                    </fields>
+                </brands_list_setup>
+                <product_page_setup translate="label">
+                    <label>Product Page Setup</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>30</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <product_page_display_mode translate="label">
+                            <label>Display mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>awshopbybrand/source_displaymode_productpage</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </product_page_display_mode>
+                    </fields>
+                </product_page_setup>
+                <all_brands_page_setup translate="label">
+                    <label>All Brands Page Setup</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>40</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <url_key translate="label">
+                            <label>URL key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <validate>validate-identifier</validate>
+                        </url_key>
+                        <title translate="label">
+                            <label>Title</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title>
+                        <meta_keywords translate="label">
+                            <label>Meta keywords</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </meta_keywords>
+                        <meta_description translate="label">
+                            <label>Meta description</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </meta_description>
+                        <al_brands_page_description translate="label">
+                            <label>All brands page description</label>
+                            <frontend_type>editor</frontend_type>
+                            <frontend_model>awshopbybrand/renderer_system_description</frontend_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </al_brands_page_description>
+                    </fields>
+                </all_brands_page_setup>
+            </groups>
+        </awshopbybrand>
+    </sections>
+</config>

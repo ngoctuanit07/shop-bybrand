@@ -1,0 +1,157 @@
+<style>
+.category-view .brandlist ul li span {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 15px 0 0;
+    padding: 0 10px;
+    text-align: center;
+    width: 100%;
+}
+.category-view .brandlist li img
+{
+	width: 150px;
+}
+.category-view .brandlist li {
+    display: inline-block;
+    float: none;
+    margin: 0 0 35px;
+    width: 22%;
+}
+div.brand_container {
+    border: 1px solid rgb(235, 235, 235);
+    display: block;
+    float: none;
+    margin: 0 auto 5px;
+    max-width: 330px;
+    min-height: 150px;
+    padding: 5px;
+    width: auto;
+}
+@media screen and (max-width: 767px) {
+    /* STYLES HERE */
+    .itemgrid.itemgrid-adaptive .item { width: 30.3333%; }
+}
+@media screen and (max-width: 530px) {
+    /* STYLES HERE */
+    .itemgrid.itemgrid-adaptive .item { width: 47.3333%; }
+}
+</style>
+<div class="brandlist">
+<ul class="products-grid category-products-grid itemgrid itemgrid-adaptive itemgrid-4col single-line-name centered equal-height size-s">
+<?php 
+
+$currentUrl = Mage::helper('core/url')->getCurrentUrl();
+$brandkey = explode("/",$currentUrl);
+//echo $brandkey[sizeof($brandkey)-1];
+?>
+<?php $menu = $this->getLayout()->createBlock('awshopbybrand/allbrands')->getBrandCollection()->addFieldToFilter('store_ids',array('like'=>'%'.Mage::app()->getStore()->getStoreId().'%'))->addFieldToFilter("url_key",array('like'=>$brandkey[sizeof($brandkey)-1])); ?>
+<?php //echo "<pre>"; print_r($menu->getData()); echo "</pre>"; exit; ?>
+<?php foreach ($menu as $item): ?>
+	<?php $brandid = $item['id']; ?>
+	<?php $productids = $item['products']; ?>
+	<?php $brandtitle = $item['title']; ?>
+<?php endforeach; ?>
+
+<?php 
+$brandcategoryimage = Mage::getModel('awshopbybrand/categoryimage')->getCollection()->addFieldToFilter('brand_id',array('eq' => $brandid));
+$catdataimage = array();
+foreach($brandcategoryimage as $brandcategoryimage1)
+{
+	//echo "<pre>"; print_r($brandcategoryimage1->getData());
+	$catdataimage[$brandcategoryimage1['name']] = $brandcategoryimage1['image'];
+}
+//echo "<pre>"; print_r($catdataimage); echo "</pre>";
+?>
+
+<?php 
+$colorOfProduct = $brandtitle;
+$attributeId = Mage::getResourceModel('eav/entity_attribute')->getIdByCode('catalog_product','aw_shopbybrand_brand');
+$attribute = Mage::getModel('catalog/resource_eav_attribute')->load($attributeId);
+$attributeOptions = $attribute ->getSource()->getAllOptions();
+
+foreach ($attributeOptions as $option) {
+	if ($option['label'] == $colorOfProduct)
+		$optionvalue = $option['value'];
+}
+?>
+
+<?php //echo "<br />".$productids; ?>
+<?php //echo "<pre>"; print_r($menu->getData()); ?>
+<?php $read = Mage::getSingleton( 'core/resource' )->getConnection( 'core_read' );
+   	$salesforce_components = Mage::getSingleton( 'core/resource' )->getTableName( 'catalog_category_product' );
+   	$query = "select * from ".$salesforce_components." where product_id in(".$productids.")";
+   	$result = $read->query( $query );
+   //	echo "<pre>";
+	$categoryid = array();
+   	while ( $row = $result->fetch() )
+   	{
+   		if(!in_array($row['category_id'], $categoryid))
+   		{
+   			$categoryid[] = $row['category_id'];
+   		}
+   	}
+   	$rootchildcategory = Mage::getModel('catalog/category')->load(Mage::app()->getStore()->getRootCategoryId())->getChildrenCategories();
+   	$rootchildcategoryid = array();
+   	foreach($rootchildcategory as $rootchildcategory1)
+   	{
+   		$rootchildcategoryid[] = $rootchildcategory1->getId();
+   	}
+   	$catposition = array();
+	foreach($categoryid as $categoryid1)
+	{
+		$catdata = Mage::getModel('catalog/category')->load($categoryid1);
+
+		$explodecat = explode("/",$catdata->getpath());
+		if(in_array(Mage::app()->getStore()->getRootCategoryId(),$explodecat))
+		{
+			if(count($explodecat) <= 3) continue;
+			//echo "<br />".$catdata->getName();
+			?>
+			<li class="item">
+				<a href="<?php echo  $catdata->getUrl()."?aw_shopbybrand_brand=".$optionvalue; ?>">
+					<?php if($catdataimage[$catdata->getName()]): ?>
+							<img src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA)."aw_shopbybrand/categoryimage/".$brandid."/".$catdataimage[$catdata->getName()]; ?>" />				
+					<?php else: ?>
+							<img src="<?php echo $this->getSkinUrl('images/no-image-available.jpg'); ?>" />
+					<?php endif; ?>
+					<span><?php echo $catdata->getName();  ?></span>
+				</a>
+			</li>
+			<?php 
+			//echo $catdata->getLevel();
+			/*if($catdata->getLevel()==3)
+			{
+				if(!in_array($catdata->getId(),$catposition[Mage::app()->getStore()->getRootCategoryId()][$catdata->getParentId()]))
+				{
+					$catposition[Mage::app()->getStore()->getRootCategoryId()][$catdata->getParentId()][] = $catdata->getId();
+				}
+			}
+			elseif($catdata->getLevel() > 3)
+			{
+				if(!in_array($explodecat[3],$catposition[Mage::app()->getStore()->getRootCategoryId()][$catdata->getParentId()]))
+				{
+					if(!in_array($explodecat[3],$catposition[Mage::app()->getStore()->getRootCategoryId()][$explodecat[2]]['level3']))
+					{
+						$catposition[Mage::app()->getStore()->getRootCategoryId()][$explodecat[2]]['level3'][] = $explodecat[3];
+					}	
+				}
+			}
+			else 
+			{
+				if(!in_array($catdata->getId(),$catposition[Mage::app()->getStore()->getRootCategoryId()][$categoryid1]))
+				{
+					$catposition[Mage::app()->getStore()->getRootCategoryId()][$categoryid1][] = $catdata->getId();
+				}
+			}*/
+		}
+	}
+   	//echo "<pre>"; print_r($ids); print_r($categoryid);
+/*   	foreach($rootchildcategoryid as $rootchildcategoryid1)
+   	{
+   		echo "<br />".$rootchildcategoryid1."  count ".count($catposition[Mage::app()->getStore()->getRootCategoryId()][$rootchildcategoryid1]);
+   	}
+   	echo "<pre>"; print_r($catposition);  exit;*/
+   	?>
+</ul>
+</div>

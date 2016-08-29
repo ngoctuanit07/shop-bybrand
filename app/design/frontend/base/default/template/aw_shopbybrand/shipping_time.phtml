@@ -1,0 +1,33 @@
+<style>
+.brand_sippingtime {
+    margin: 25px 0 0;
+}
+</style>
+<?php //echo $this->getBrandShippingTime()." shipping time"; ?>
+<?php //echo "<pre>"; print_r($this->getBrandShippingTime()); echo "</pre>"; ?>
+<?php 
+$brandcollection = Mage::getModel('awshopbybrand/brand')->getCollection();
+$brandcollection->addFieldToFilter('page_title', array('like' => 'Elegant Lighting'));
+foreach($brandcollection as $brandcollection1){
+	$brandid = $brandcollection1['id'];
+	$shippingtime = $brandcollection1['shipping_time'];
+}
+$brandstorecollection = Mage::getModel('awshopbybrand/brandstore')->getCollection();
+$brandstorecollection->addFieldToFilter('brand_id', array('eq' => $brandid));
+$brandstorecollection->addFieldToFilter('store_id', array('eq' => Mage::app()->getStore()->getStoreId()));
+foreach($brandstorecollection as $brandstorecollection1){
+	//$brandid = $brandcollection1['id'];
+	$shippingstoretime = $brandstorecollection1['shipping_time'];
+}
+//echo "<pre>"; print_r($brandstorecollection->getData()); echo "</pre>";
+//echo $shippingstoretime;
+?>
+<?php if($this->getShippingTime()): ?>
+<div class="brand_sippingtime">
+	<span><b>Shipping Time : </b>
+	<?php //echo ($shippingstoretime) ? $shippingstoretime : $shippingtime; ?>
+	<?php echo $this->getShippingTime(); ?>
+	</span>
+	<span><?php //echo Mage::registry('current_product')->getAttributeText('manufacturer'); ?></span>
+</div>
+<?php endif; ?>
